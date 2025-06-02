@@ -8,25 +8,20 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
+      background: #f4f4f4;
       margin: 0;
-      padding: 30px;
+      padding: 20px;
     }
     .receipt {
       background: #fff;
       padding: 25px;
-      max-width: 800px;
+      max-width: 700px;
       margin: auto;
       border: 1px solid #ccc;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    }
-    .receipt-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h2 {
-      margin: 0;
+      margin-top: 0;
     }
     table {
       width: 100%;
@@ -38,146 +33,123 @@
       border: 1px solid #ccc;
       text-align: center;
     }
-    th:first-child, td:first-child {
-      text-align: left;
-    }
     .totals {
-      margin-top: 30px;
-      font-weight: bold;
-      line-height: 1.6;
-    }
-    .actions {
-      text-align: center;
-      margin-top: 30px;
-    }
-    .actions button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 15px;
-      cursor: pointer;
-    }
-    .note {
       margin-top: 20px;
-      font-size: 14px;
-      color: #555;
+      font-weight: bold;
+    }
+    .buttons {
+      margin-top: 30px;
       text-align: center;
+    }
+    .buttons button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-
-<div class="receipt" id="receipt">
-  <div class="receipt-header">
+  <div class="receipt" id="receipt">
     <h2>DHS Class of 1975 Reunion Registration Receipt</h2>
-    <div id="todayDate" style="font-size: 14px; color: #555;"></div>
+    <div style="text-align: right;" id="date"></div>
+    <p>
+      <strong>Classmate Name:</strong> <span id="name"></span><br>
+      <strong>Guest Name:</strong> <span id="guest"></span><br>
+      <strong>Registration ID:</strong> <span id="regId"></span><br>
+      <strong>Email:</strong> <span id="email"></span>
+    </p>
+
+    <h3>Event Attendance</h3>
+    <table>
+      <thead>
+        <tr><th>Event / Time</th><th>Classmate</th><th>Guest</th></tr>
+      </thead>
+      <tbody id="events"></tbody>
+    </table>
+
+    <div class="totals">
+      <p>
+        Classmate Registration: $<span id="fee1"></span><br>
+        Guest Registration: $<span id="fee2"></span><br>
+        Legacy Fund Donation: $<span id="legacy"></span><br>
+        <strong>Total Paid:</strong> $<span id="total"></span>
+      </p>
+    </div>
+
+    <p>Thank you for registering! If you have any questions, reply to this email.</p>
+
+    <div class="buttons">
+      <button onclick="downloadPDF()">Download PDF</button>
+      <button onclick="window.print()">Print</button>
+      <button onclick="emailReceipt()">Email to <span id="emailBtn"></span></button>
+    </div>
   </div>
 
-  <hr>
+  <script>
+    function getParam(key) {
+      const url = new URL(window.location.href);
+      return decodeURIComponent(url.searchParams.get(key) || "").trim();
+    }
 
-  <div><strong>Classmate Name:</strong> <span id="classmateName"></span></div>
-  <div><strong>Guest Name:</strong> <span id="guestName"></span></div>
-  <div><strong>Registration ID:</strong> <span id="regId"></span></div>
-  <div><strong>Email:</strong> <span id="emailAddress"></span></div>
+    function capitalizeName(name) {
+      return name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+    }
 
-  <h3 style="margin-top: 30px;">Event Attendance</h3>
-  <table>
-    <thead>
-      <tr style="background-color: #eee;">
-        <th>Event / Time</th>
-        <th style="width: 120px;">Classmate</th>
-        <th style="width: 120px;">Guest</th>
-      </tr>
-    </thead>
-    <tbody id="eventRows">
-      <!-- JavaScript will populate this -->
-    </tbody>
-  </table>
+    function addCheckmark(value) {
+      const v = value.toLowerCase();
+      return (v === "yes" || v === "✓") ? "✓" : "";
+    }
 
-  <div class="totals">
-    <p>Classmate Registration: $<span id="classmateFee"></span><br>
-    <span id="guestFeeRow" style="display:none;">Guest Registration: $<span id="guestFee"></span><br></span>
-    Legacy Fund Donation: $<span id="legacy"></span><br>
-    <strong>Total Paid:</strong> $<span id="total"></span></p>
-  </div>
+    const name = getParam("name");
+    const guest = getParam("guest");
+    const email = getParam("email");
+    const fee = parseFloat(getParam("fee") || "0");
+    const legacy = parseFloat(getParam("legacy") || "0");
+    const guestIsPresent = guest !== "";
 
-  <p class="note">Thank you for registering! If you have any questions, reply to this email.</p>
-</div>
+    document.getElementById("name").textContent = capitalizeName(name);
+    document.getElementById("guest").textContent = capitalizeName(guest);
+    document.getElementById("regId").textContent = getParam("regId");
+    document.getElementById("email").textContent = email;
+    document.getElementById("emailBtn").textContent = email;
+    document.getElementById("date").textContent = new Date().toLocaleDateString();
+    document.getElementById("fee1").textContent = fee.toFixed(2);
+    document.getElementById("fee2").textContent = guestIsPresent ? fee.toFixed(2) : "0.00";
+    document.getElementById("legacy").textContent = legacy.toFixed(2);
+    document.getElementById("total").textContent = (fee + (guestIsPresent ? fee : 0) + legacy).toFixed(2);
 
-<div class="actions">
-  <button onclick="downloadPDF()">Download PDF</button>
-  <button onclick="window.print()">Print</button>
-  <button onclick="sendEmail()">Email to <span id="emailButtonText"></span></button>
-</div>
+    const events = [
+      { label: "Friday Tour - 10:00 AM", c: "friday_tour_classmate", g: "friday_tour_guest" },
+      { label: "Tailgate Party - 5:00 PM", c: "tailgate_classmate", g: "tailgate_guest" },
+      { label: "Football Game - 7:00 PM", c: "football_game_classmate", g: "football_game_guest" },
+      { label: "Saturday Tour - 9:00 AM", c: "saturday_tour_classmate", g: "saturday_tour_guest" },
+      { label: "Saturday Breakfast - 8:00 AM", c: "saturday_breakfast_classmate", g: "saturday_breakfast_guest" },
+      { label: "Saturday Golf - 12:00 PM", c: "saturday_golf_classmate", g: "saturday_golf_guest" },
+      { label: "Reunion Dinner - 6:00 PM", c: "reunion_dinner_classmate", g: "reunion_dinner_guest" }
+    ];
 
-<script>
-  function getParam(key) {
-    const url = new URL(window.location.href);
-    return decodeURIComponent(url.searchParams.get(key) || "").toLowerCase();
-  }
+    const tbody = document.getElementById("events");
+    events.forEach(e => {
+      const classmate = addCheckmark(getParam(e.c));
+      const guest = addCheckmark(getParam(e.g));
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${e.label}</td><td>${classmate}</td><td>${guest}</td>`;
+      tbody.appendChild(tr);
+    });
 
-  function addCheck(value) {
-    return value === "yes" || value === "✓" ? "✓" : "";
-  }
+    function downloadPDF() {
+      html2pdf().from(document.getElementById("receipt")).save("DHS-Reunion-Receipt.pdf");
+    }
 
-  // Fill basic data
-  const classmate = getParam("name");
-  const guest = getParam("guest");
-  const regId = getParam("regid");
-  const email = getParam("email");
-  const legacy = parseFloat(getParam("legacy") || "0").toFixed(2);
-  const baseFee = parseFloat(getParam("fee") || "0");
-
-  // Set receipt fields
-  document.getElementById("classmateName").textContent = classmate;
-  document.getElementById("guestName").textContent = guest;
-  document.getElementById("regId").textContent = regId;
-  document.getElementById("emailAddress").textContent = email;
-  document.getElementById("emailButtonText").textContent = email;
-  document.getElementById("legacy").textContent = legacy;
-  document.getElementById("todayDate").textContent = new Date().toLocaleDateString();
-
-  // Calculate fees
-  const guestFee = guest ? baseFee : 0;
-  document.getElementById("classmateFee").textContent = baseFee.toFixed(2);
-  if (guestFee > 0) {
-    document.getElementById("guestFee").textContent = guestFee.toFixed(2);
-    document.getElementById("guestFeeRow").style.display = "inline";
-  }
-
-  const total = baseFee + guestFee + parseFloat(legacy);
-  document.getElementById("total").textContent = total.toFixed(2);
-
-  // Populate event table
-  const events = [
-    { label: "Friday Tour - 10:00 AM", c: "friday_tour_classmate", g: "friday_tour_guest" },
-    { label: "Tailgate Party - 5:00 PM", c: "tailgate_classmate", g: "tailgate_guest" },
-    { label: "Football Game - 7:00 PM", c: "football_game_classmate", g: "football_game_guest" },
-    { label: "Saturday Tour - 9:00 AM", c: "saturday_tour_classmate", g: "saturday_tour_guest" },
-    { label: "Saturday Breakfast - 8:00 AM", c: "saturday_breakfast_classmate", g: "saturday_breakfast_guest" },
-    { label: "Saturday Golf - 12:00 PM", c: "saturday_golf_classmate", g: "saturday_golf_guest" },
-    { label: "Reunion Dinner - 6:00 PM", c: "reunion_dinner_classmate", g: "reunion_dinner_guest" }
-  ];
-
-  const tbody = document.getElementById("eventRows");
-  events.forEach(evt => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${evt.label}</td><td>${addCheck(getParam(evt.c))}</td><td>${addCheck(getParam(evt.g))}</td>`;
-    tbody.appendChild(tr);
-  });
-
-  function downloadPDF() {
-    html2pdf().from(document.getElementById("receipt")).save("DHS-Reunion-Receipt.pdf");
-  }
-
-  function sendEmail() {
-    const subject = "DHS Reunion Registration Receipt";
-    const body = encodeURIComponent(document.getElementById("receipt").innerText);
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-  }
-</script>
-
+    function emailReceipt() {
+      const body = encodeURIComponent(document.getElementById("receipt").innerText);
+      window.location.href = `mailto:${email}?subject=DHS Reunion Receipt&body=${body}`;
+    }
+  </script>
 </body>
 </html>
+
 
 
 
