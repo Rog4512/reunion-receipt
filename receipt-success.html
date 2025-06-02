@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DHS 1975 Reunion Registration Receipt</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
@@ -52,7 +51,7 @@
 <body>
   <div class="receipt" id="receipt">
     <h2>DHS Class of 1975 Reunion Registration Receipt</h2>
-    <div style="text-align: right;" id="date"></div>
+    <p id="date"></p>
     <p>
       <strong>Classmate Name:</strong> <span id="name"></span><br>
       <strong>Guest Name:</strong> <span id="guest"></span><br>
@@ -63,15 +62,16 @@
     <h3>Event Attendance</h3>
     <table>
       <thead>
-        <tr><th>Event / Time</th><th>Classmate</th><th>Guest</th></tr>
+        <tr><th>Event</th><th>Classmate</th><th>Guest</th></tr>
       </thead>
       <tbody id="events"></tbody>
     </table>
 
     <div class="totals">
       <p>
-        Classmate Registration: $<span id="fee1"></span><br>
-        Guest Registration: $<span id="fee2"></span><br>
+        Classmate Registration: $<span id="regClassmate"></span><br>
+        Guest Registration: $<span id="regGuest"></span><br>
+        <strong>Total Registration Fee:</strong> $<span id="regTotal"></span><br>
         Legacy Fund Donation: $<span id="legacy"></span><br>
         <strong>Total Paid:</strong> $<span id="total"></span>
       </p>
@@ -80,8 +80,8 @@
     <p>Thank you for registering! If you have any questions, reply to this email.</p>
 
     <div class="buttons">
-      <button onclick="downloadPDF()">Download PDF</button>
       <button onclick="window.print()">Print</button>
+      <button onclick="downloadPDF()">Download PDF</button>
       <button onclick="emailReceipt()">Email to <span id="emailBtn"></span></button>
     </div>
   </div>
@@ -89,35 +89,43 @@
   <script>
     function getParam(key) {
       const url = new URL(window.location.href);
-      return decodeURIComponent(url.searchParams.get(key) || "").trim();
+      return decodeURIComponent(url.searchParams.get(key) || "");
     }
 
-    function capitalizeName(name) {
-      return name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+    function capitalize(name) {
+      return name.replace(/\b\w/g, c => c.toUpperCase());
     }
 
-    function addCheckmark(value) {
-      const v = value.toLowerCase();
-      return (v === "yes" || v === "✓") ? "✓" : "";
+    function addY(value) {
+      return value.toLowerCase() === "yes" ? "Y" : "";
     }
 
-    const name = getParam("name");
-    const guest = getParam("guest");
+    // Fill values
+    const name = capitalize(getParam("name"));
+    const guest = capitalize(getParam("guest"));
     const email = getParam("email");
-    const fee = parseFloat(getParam("fee") || "0");
-    const legacy = parseFloat(getParam("legacy") || "0");
-    const guestIsPresent = guest !== "";
+    const regId = getParam("regId");
+    const legacy = getParam("legacy");
+    const total = getParam("total");
 
-    document.getElementById("name").textContent = capitalizeName(name);
-    document.getElementById("guest").textContent = capitalizeName(guest);
-    document.getElementById("regId").textContent = getParam("regId");
+    const classmateAttending = getParam("classmate_attending").toLowerCase() === "yes" ? 1 : 0;
+    const bringingGuest = getParam("bringing_guest").toLowerCase() === "yes" ? 1 : 0;
+
+    const classmateFee = classmateAttending * 50;
+    const guestFee = bringingGuest * 50;
+    const regFee = classmateFee + guestFee;
+
+    document.getElementById("name").textContent = name;
+    document.getElementById("guest").textContent = guest;
     document.getElementById("email").textContent = email;
     document.getElementById("emailBtn").textContent = email;
+    document.getElementById("regId").textContent = regId;
+    document.getElementById("legacy").textContent = legacy;
+    document.getElementById("total").textContent = total;
+    document.getElementById("regClassmate").textContent = classmateFee.toFixed(2);
+    document.getElementById("regGuest").textContent = guestFee.toFixed(2);
+    document.getElementById("regTotal").textContent = regFee.toFixed(2);
     document.getElementById("date").textContent = new Date().toLocaleDateString();
-    document.getElementById("fee1").textContent = fee.toFixed(2);
-    document.getElementById("fee2").textContent = guestIsPresent ? fee.toFixed(2) : "0.00";
-    document.getElementById("legacy").textContent = legacy.toFixed(2);
-    document.getElementById("total").textContent = (fee + (guestIsPresent ? fee : 0) + legacy).toFixed(2);
 
     const events = [
       { label: "Friday Tour - 10:00 AM", c: "friday_tour_classmate", g: "friday_tour_guest" },
@@ -131,8 +139,8 @@
 
     const tbody = document.getElementById("events");
     events.forEach(e => {
-      const classmate = addCheckmark(getParam(e.c));
-      const guest = addCheckmark(getParam(e.g));
+      const classmate = addY(getParam(e.c));
+      const guest = addY(getParam(e.g));
       const tr = document.createElement("tr");
       tr.innerHTML = `<td>${e.label}</td><td>${classmate}</td><td>${guest}</td>`;
       tbody.appendChild(tr);
@@ -149,6 +157,7 @@
   </script>
 </body>
 </html>
+
 
 
 
