@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DHS 1975 Reunion Registration Receipt</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -49,7 +50,7 @@
   </style>
 </head>
 <body>
-  <div class="receipt">
+  <div id="receipt" class="receipt">
     <h2>DHS Class of 1975 Reunion Registration Receipt</h2>
     <p id="date"></p>
     <p><strong>Classmate Name:</strong> <span id="name"></span><br>
@@ -115,7 +116,8 @@
     });
 
     function downloadPDF() {
-      window.print(); // This launches print dialog, and browser will allow "Save as PDF"
+      const element = document.getElementById("receipt");
+      html2pdf().from(element).save("DHS_1975_Receipt.pdf");
     }
 
     function emailReceipt() {
