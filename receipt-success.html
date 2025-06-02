@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DHS 1975 Reunion Registration Receipt</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    .receipt {
+      background: #fff;
+      padding: 25px;
+      max-width: 700px;
+      margin: auto;
+      border: 1px solid #ccc;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    .totals {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .buttons {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .buttons button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <h2>DHS Class of 1975 Reunion Registration Receipt</h2>
+    <p id="date"></p>
+    <p><strong>Classmate Name:</strong> <span id="name"></span><br>
+    <strong>Guest Name:</strong> <span id="guest"></span><br>
+    <strong>Registration ID:</strong> <span id="regId"></span><br>
+    <strong>Email:</strong> <span id="email"></span></p>
+
+    <h3>Event Attendance</h3>
+    <table>
+      <thead>
+        <tr><th>Event</th><th>Classmate</th><th>Guest</th></tr>
+      </thead>
+      <tbody id="events"></tbody>
+    </table>
+
+    <div class="totals">
+      <p>Legacy Fund Donation: $<span id="legacy"></span><br>
+      Registration Fee: $<span id="fee"></span><br>
+      <strong>Total Paid:</strong> $<span id="total"></span></p>
+    </div>
+
+    <p>Thank you for registering! If you have any questions, reply to this email.</p>
+
+    <div class="buttons">
+      <button onclick="window.print()">Print</button>
+      <button onclick="downloadPDF()">Download PDF</button>
+      <button onclick="emailReceipt()">Email to <span id="emailBtn"></span></button>
+    </div>
+  </div>
+
+  <script>
+    function getParam(key) {
+      const url = new URL(window.location);
+      return decodeURIComponent(url.searchParams.get(key) || "");
+    }
+
+    function addCheckmark(rowId, condition) {
+      return condition === "Yes" || condition === "✓" ? "✓" : "";
+    }
+
+    document.getElementById("name").textContent = getParam("name");
+    document.getElementById("guest").textContent = getParam("guest");
+    document.getElementById("regId").textContent = getParam("regId");
+    const email = getParam("email");
+    document.getElementById("email").textContent = email;
+    document.getElementById("emailBtn").textContent = email;
+    document.getElementById("legacy").textContent = getParam("legacy");
+    document.getElementById("fee").textContent = getParam("fee");
+    document.getElementById("total").textContent = getParam("total");
+    document.getElementById("date").textContent = new Date().toLocaleDateString();
+
+    const events = [
+      { label: "Friday Tour - 10:00 AM", c: "event1c", g: "event1g" },
+      { label: "Tailgate Party - 5:00 PM", c: "event2c", g: "event2g" },
+      { label: "Reunion Dinner - 6:00 PM", c: "event3c", g: "event3g" }
+    ];
+
+    const tbody = document.getElementById("events");
+    events.forEach(e => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${e.label}</td><td>${addCheckmark(e.c, getParam(e.c))}</td><td>${addCheckmark(e.g, getParam(e.g))}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    function downloadPDF() {
+      window.print(); // This launches print dialog, and browser will allow "Save as PDF"
+    }
+
+    function emailReceipt() {
+      const body = encodeURIComponent(document.body.innerText);
+      window.location.href = `mailto:${email}?subject=DHS Reunion Receipt&body=${body}`;
+    }
+  </script>
+</body>
+</html>
