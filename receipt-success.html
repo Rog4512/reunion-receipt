@@ -69,9 +69,11 @@
     </table>
 
     <div class="totals">
-      <p>Legacy Fund Donation: $<span id="legacy"></span><br>
-      Registration Fee: $<span id="fee"></span><br>
-      <strong>Total Paid:</strong> $<span id="total"></span></p>
+      <p>
+        Legacy Fund Donation: $<span id="legacy"></span><br>
+        Registration Fee: $<span id="regFee"></span><br>
+        <strong>Total Paid:</strong> $<span id="total"></span>
+      </p>
     </div>
 
     <p>Thank you for registering! If you have any questions, reply to this email.</p>
@@ -93,16 +95,22 @@
       return value === "yes" || value === "✓" ? "✓" : "";
     }
 
-    document.getElementById("name").textContent = getParam("name");
-    document.getElementById("guest").textContent = getParam("guest");
-    document.getElementById("regId").textContent = getParam("regId");
+    // Fill static fields
     const email = getParam("email");
+    const guest = getParam("guest");
+    document.getElementById("name").textContent = getParam("name");
+    document.getElementById("guest").textContent = guest;
+    document.getElementById("regId").textContent = getParam("regId");
     document.getElementById("email").textContent = email;
     document.getElementById("emailBtn").textContent = email;
     document.getElementById("legacy").textContent = getParam("legacy");
-    document.getElementById("fee").textContent = getParam("fee");
     document.getElementById("total").textContent = getParam("total");
     document.getElementById("date").textContent = new Date().toLocaleDateString();
+
+    // Calculate registration fee
+    const baseFee = parseFloat(getParam("fee") || "0");
+    const fullFee = guest ? baseFee * 2 : baseFee;
+    document.getElementById("regFee").textContent = fullFee.toFixed(2);
 
     const events = [
       { label: "Friday Tour - 10:00 AM", c: "friday_tour_classmate", g: "friday_tour_guest" },
@@ -135,4 +143,5 @@
   </script>
 </body>
 </html>
+
 
