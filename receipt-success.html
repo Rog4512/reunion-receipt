@@ -50,13 +50,15 @@
   </style>
 </head>
 <body>
-  <div id="receipt" class="receipt">
+  <div class="receipt" id="receipt">
     <h2>DHS Class of 1975 Reunion Registration Receipt</h2>
     <p id="date"></p>
-    <p><strong>Classmate Name:</strong> <span id="name"></span><br>
-    <strong>Guest Name:</strong> <span id="guest"></span><br>
-    <strong>Registration ID:</strong> <span id="regId"></span><br>
-    <strong>Email:</strong> <span id="email"></span></p>
+    <p>
+      <strong>Classmate Name:</strong> <span id="name"></span><br>
+      <strong>Guest Name:</strong> <span id="guest"></span><br>
+      <strong>Registration ID:</strong> <span id="regId"></span><br>
+      <strong>Email:</strong> <span id="email"></span>
+    </p>
 
     <h3>Event Attendance</h3>
     <table>
@@ -87,8 +89,8 @@
       return decodeURIComponent(url.searchParams.get(key) || "");
     }
 
-    function addCheckmark(rowId, condition) {
-      return condition === "Yes" || condition === "✓" ? "✓" : "";
+    function addCheckmark(condition) {
+      return condition.toLowerCase() === "yes" || condition === "✓" ? "✓" : "";
     }
 
     document.getElementById("name").textContent = getParam("name");
@@ -103,21 +105,27 @@
     document.getElementById("date").textContent = new Date().toLocaleDateString();
 
     const events = [
-      { label: "Friday Tour - 10:00 AM", c: "event1c", g: "event1g" },
-      { label: "Tailgate Party - 5:00 PM", c: "event2c", g: "event2g" },
-      { label: "Reunion Dinner - 6:00 PM", c: "event3c", g: "event3g" }
+      { label: "Friday Tour - 10:00 AM", c: "friday_tour_classmate", g: "friday_tour_guest" },
+      { label: "Tailgate Party - 5:00 PM", c: "tailgate_classmate", g: "tailgate_guest" },
+      { label: "Football Game - 7:00 PM", c: "football_game_classmate", g: "football_game_guest" },
+      { label: "Saturday Tour - 9:00 AM", c: "saturday_tour_classmate", g: "saturday_tour_guest" },
+      { label: "Saturday Breakfast - 8:00 AM", c: "saturday_breakfast_classmate", g: "saturday_breakfast_guest" },
+      { label: "Saturday Golf - 12:00 PM", c: "saturday_golf_classmate", g: "saturday_golf_guest" },
+      { label: "Reunion Dinner - 6:00 PM", c: "reunion_dinner_classmate", g: "reunion_dinner_guest" }
     ];
 
     const tbody = document.getElementById("events");
     events.forEach(e => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${e.label}</td><td>${addCheckmark(e.c, getParam(e.c))}</td><td>${addCheckmark(e.g, getParam(e.g))}</td>`;
+      const classmate = addCheckmark(getParam(e.c));
+      const guest = addCheckmark(getParam(e.g));
+      tr.innerHTML = `<td>${e.label}</td><td>${classmate}</td><td>${guest}</td>`;
       tbody.appendChild(tr);
     });
 
     function downloadPDF() {
       const element = document.getElementById("receipt");
-      html2pdf().from(element).save("DHS_1975_Receipt.pdf");
+      html2pdf().from(element).save("DHS-Reunion-Receipt.pdf");
     }
 
     function emailReceipt() {
@@ -127,3 +135,4 @@
   </script>
 </body>
 </html>
+
