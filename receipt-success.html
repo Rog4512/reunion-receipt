@@ -85,12 +85,12 @@
 
   <script>
     function getParam(key) {
-      const url = new URL(window.location);
-      return decodeURIComponent(url.searchParams.get(key) || "");
+      const url = new URL(window.location.href);
+      return decodeURIComponent(url.searchParams.get(key) || "").toLowerCase();
     }
 
-    function addCheckmark(condition) {
-      return condition.toLowerCase() === "yes" || condition === "✓" ? "✓" : "";
+    function addCheckmark(value) {
+      return value === "yes" || value === "✓" ? "✓" : "";
     }
 
     document.getElementById("name").textContent = getParam("name");
@@ -116,9 +116,9 @@
 
     const tbody = document.getElementById("events");
     events.forEach(e => {
-      const tr = document.createElement("tr");
       const classmate = addCheckmark(getParam(e.c));
       const guest = addCheckmark(getParam(e.g));
+      const tr = document.createElement("tr");
       tr.innerHTML = `<td>${e.label}</td><td>${classmate}</td><td>${guest}</td>`;
       tbody.appendChild(tr);
     });
